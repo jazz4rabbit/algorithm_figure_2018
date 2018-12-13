@@ -1,0 +1,150 @@
+\documentclass[margin=10pt,tikz]{standalone}
+%\documentclass[x11names]{article}
+\usepackage{tikz}
+\usepackage{kotex}
+\usepackage{enumitem}
+
+\usetikzlibrary{shapes,arrows,chains}
+
+
+\tikzset{
+	base/.style={draw, on chain, on grid, align=center, minimum height=4ex},
+	proc/.style={base, rectangle, text width=8em, fill=orange!30},
+	ano/.style={base, rectangle, text width=10em, align=left},
+	test/.style={base, diamond, aspect=2, text width=5em, fill=green!30},
+	term/.style={proc, rounded corners, fill=red!30},
+	io/.style={base, trapezium, trapezium left angle=70, trapezium right angle=110, fill=blue!30},
+	% coord node style is used for placing corners of connecting lines
+	coord/.style={coordinate, on chain, on grid, node distance=6mm and 25mm},
+	% -------------------------------------------------
+	% Connector line styles for different parts of the diagram
+	norm/.style={->,>=stealth, draw},
+	left sided/.style={
+		draw=none,
+		append after command={
+			[shorten <= -0.5\pgflinewidth]
+			([shift={(-1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north east)
+			edge([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west) 
+			([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+			edge([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)            
+			([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+			edge([shift={(-1.0\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south east)
+		}
+	},
+	right sided/.style={
+		draw=none,
+		append after command={
+			[shorten <= -0.5\pgflinewidth]
+			([shift={(-1.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north west)
+			edge([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north east) 
+			([shift={( 0.5\pgflinewidth,-0.5\pgflinewidth)}]\tikzlastnode.north east)
+			edge([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south east)            
+			([shift={( 0.5\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south east)
+			edge([shift={(-1.0\pgflinewidth,+0.5\pgflinewidth)}]\tikzlastnode.south west)
+		}
+	}
+}
+
+\begin{document}
+%[node distance=2cm]
+\begin{tikzpicture}[%
+	>=triangle 60,              % Nice arrows; your taste may be different
+	start chain=going below,    % General flow is top-to-bottom
+	node distance=6mm and 50mm, % Global setup of box spacing
+	every join/.style={norm},   % Default linetype for connecting boxes
+	]
+\node [term]       (start)	{시작};
+\node [io,   join] (io1)	{오염사고\\[1mm]시나리오 설정};
+\node [proc, join] (p1)		{최대유출 사건 발생};
+\node [proc, join] (p22)	{인근 권역장비\\[1mm] 2일 작업};
+\node [proc, join] (p3)		{회수목표치 회수완료};
+\node [io, join]   (io2)	{광역내\\[1mm] 장비수량 산정};
+\node [io, join]			{권역내 지역별\\[1mm] 장비수량 산정};
+\node [term, join] (end)	{끝};
+
+\node [proc, left=of p22] (p21)	{사고구역 권역장비\\[1mm] 3일 작업};
+\node [proc, right=of p22] (p23)	{원거리 권역장비\\[1mm] 1일 작업};
+%
+
+
+%
+\node [coord, right=of io2] (c1)  {};
+%
+\node [ano, left sided, right=of io2, yshift=-1cm,] (a1) {
+	\footnotesize \begin{enumerate} [leftmargin=*,topsep=0pt]
+	\item 하루 8시간 작업시\\[1mm]3일 이내에 회수가능
+	\end{enumerate}
+};
+%
+%\path (t1.west) to node [near start, yshift=1em] {No} (c1);
+%  \draw [norm] (t1.west) -- (c1) |- (p3);
+%\path (t1.south) to node [near start, xshift=1em] {Yes} (ee);
+
+\draw (io2.east) -- (a1.west);
+\draw [norm] (p1) -| (p21);
+\draw [norm] (p1) -| (p23);
+\draw [norm] (p21) |- (p3);
+\draw [norm] (p23) |- (p3);
+%\draw (p1.north east) -- (a1.north west);
+%\draw (p1.south east) -- (a1.south west);
+%\draw (p2.north east) -- (a2.north west);
+%\draw (p2.south east) -- (a2.south west);
+\end{tikzpicture}
+
+\begin{tikzpicture}[%
+>=triangle 60,              % Nice arrows; your taste may be different
+start chain=going below,    % General flow is top-to-bottom
+node distance=6mm and 50mm, % Global setup of box spacing
+every join/.style={norm},   % Default linetype for connecting boxes
+]
+
+\node [term]       (start)	{시작};
+\node [io,   join] (io1)	{오염사고\\[1mm]시나리오 설정};
+\node [proc, join] 			{무작위로 지역별로\\[1mm]장비 배치};
+\node [proc, join] (p1)		{사건 발생};
+\node [proc, join, very thick, style=double] (p22)		{인근 장비 항해\\[1mm] 및 동원시간을\\[1mm]고려하여 작업};
+\node [proc, join] (p3)		{회수목표치\\[1mm]회수완료};
+\node [test, join, very thick, style=double] (t1)		{\footnotesize 작업시간이\\단축되었는가?};
+\node [term, join] (end)	{끝};
+
+
+\node [proc, right=of t1, below of=p22, very thick, style=double] (p4)		{\footnotesize 최적화 알고리즘으로 \\[1mm] 지역별 장비 재배치};
+\node [proc, left=of p22] (p21) {사고구역 지역장비\\3일 작업};
+
+
+
+\node [coord, right=of t1] (c1)  {};
+
+%
+\node [ano, left sided, right=of p1, yshift=1.5cm, text width=12em] (a1) {
+	\footnotesize 
+	실제 상황에 가까운 조건 고려
+	\begin{enumerate} [leftmargin=0.6cm]
+	\item 출항준비시간
+	\item 항해속도, 항해시간
+	\item 육로이동시간
+	\end{enumerate}
+};
+
+\node [ano, right sided, left=of t1, xshift=-1cm, yshift=1cm, text width=16em] (a2) {
+\footnotesize
+\begin{enumerate} [leftmargin=*, topsep=0pt]
+\item 작업시간은 작업개시시각으로부터 3일이내\\(1일 작업시간 기준 08:00-16:00)
+\item 작업시간 최소화
+\end{enumerate}
+};
+
+
+\path (t1.south) to node [near start, xshift=1em] {Yes} (end);
+\path (t1.east) to node [near start, yshift=1em] {No} (c1);
+\draw (a1.west) -- (p22.east);
+\draw (a2.east) -- (t1.north west);
+\draw [norm] (t1.east) -| (p4);
+\draw [norm] (p4) |- (p1);
+
+\draw [norm] (p1) -| (p21);
+\draw [norm] (p21) |- (p3);
+
+\end{tikzpicture}
+
+\end{document}
